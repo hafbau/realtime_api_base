@@ -8,11 +8,23 @@ module.exports = ({ User }, render) => {
     },
 
     getLogout: async (ctx) => {
-      if (!ctx.user) ctx.redirect('/login');
-      ctx.user.lastActive = Date.now();
+      if (ctx.user) {
+        ctx.user.lastActive = Date.now();
+        ctx.user.loggedIn = false;
+        User.save(ctx.user);
 
-      User.save(ctx.user);
-      ctx.body = User.find()//"<h3>Logged out, can login again <a href='/login' </a></h3>"
+        ctx.status = 200;
+        return ctx.body = {
+          success: true,
+          loggedIn: false
+        }
+      }
+      ctx.status = 404;
+      ctx.body = {
+        success: false,
+        message: "Not Found",
+        fullMessage: "Not logged in"
+      }
     },
 
     getRegister: async (ctx) => {

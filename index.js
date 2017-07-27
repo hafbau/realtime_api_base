@@ -15,22 +15,13 @@ const app = new Koa();
 const { io, server } = require('./io')(app);
 
 // =======================
-// routes =========
-// =======================
-router.get('/', async (ctx) => {
-  const { req, res } = ctx;
-  await send(ctx, `index.html`).then(_ => io.emit('got root', 'inroot route'));
-});
-const { auth } = require('./routes');
-
-// =======================
 // middlewares =========
 // =======================
 app.use(bodyParser());
 
 const { User } = require('./models')
 app.use((ctx, next) => {
-  // TODO: move to router logic - separaing nonAuth routes
+  // TODO: move to router logic - separating nonAuth routes
   if (ctx.method == "POST" || ctx.path == "/login") return next();
   ctx.body = ctx.body || {}
   const token = ctx.body.token || ctx.query.token || ctx.headers['x-access-token'];
@@ -49,11 +40,38 @@ app.use((ctx, next) => {
   }
   catch (err) {
    console.log("token verification middleware failed", err);
-   ctx.redirect('/login');
+   if (ctx.path == "/") return next();
+   ctx.status = 403;
+   ctx.body = {
+     success: false,
+     message: "Unauthorized",
+     fullMessage: err.message
+   }
   }
 
 });
 
+
+// =======================
+// routes =========
+// =======================
+router.get('/', async (ctx) => {
+  const { req, res, user } = ctx;
+  if (user) {
+    ctx.body = {
+      user,
+      loggedIn: true
+    }
+  } else {
+    ctx.body = {
+      loggedIn: false
+    }
+  }
+
+  ctx.status = 200;
+});
+
+const { auth } = require('./routes');
 app.use(router.routes());
 app.use(auth.routes());
 

@@ -18,7 +18,8 @@ describe("Tests for /utils files", () => {
 
    describe("getExports for other module", () => {
      it("should get exported routes", () => {
-      const controllers = require('../../controllers');
+      const models = require('../../models');
+      const controllers = require('../../controllers')(models);
       const router = require('koa-router')();
       const dir = `${__dirname}/../../routes`;
       const currentFile = "index.js";

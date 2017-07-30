@@ -4,6 +4,7 @@
   "description": "",
   "main": "serverModule.js",
   "scripts": {
+    "debug": "node inspect index.js",
     "start": "nodemon index.js",
     "jasmine": "jasmine-node --verbose",
     "test": "jasmine-node --verbose spec/",
@@ -14,6 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "caminte": "^0.4.0",
     "jsonwebtoken": "^7.4.1",
     "koa": "^2.3.0",
     "koa-body": "^2.3.0",
@@ -27,8 +29,6 @@
     "jasmine-node": "^1.14.5",
     "koa-send": "^4.1.0",
     "nodemon": "^1.11.0",
-    "request": "^2.81.0",
-    "request-promise-native": "^1.0.4",
     "zombie": "^5.0.7"
   }
 }

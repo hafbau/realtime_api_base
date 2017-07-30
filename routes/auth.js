@@ -1,11 +1,11 @@
 /* @params: controller object, and router
 ** @returns the router, with the routes attached
 */
-module.exports = ({ auth }, router) => {
+module.exports = ({ controllers: { auth }, middlewares: { ensureUser }, router }) => {
   router
     .get('/login', auth.getLogin)
 
-    .get('/logout', auth.getLogout)
+    .get('/logout', ensureUser, auth.getLogout)
 
     .get('/register', auth.getRegister)
 
@@ -13,5 +13,5 @@ module.exports = ({ auth }, router) => {
 
     .post('/register', auth.postRegister)
 
-    return router;
+  return router;
 }

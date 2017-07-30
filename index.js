@@ -1,81 +1,43 @@
 const Koa = require('koa');
-const router = require('koa-router')();
-const send = require('koa-send');
-
 const bodyParser = require('koa-body');
 const jwt = require('jsonwebtoken');
+const router = require('koa-router')();
+const render = require('koa-send');
+
 // =======================
 // configuration =========
 // =======================
-const config = require('./config');
 const app = new Koa();
+const config = require('./config');
+const middlewares = require('./middlewares')();
 
-// app.set('tokenSecret', config.tokenSecret);
+const models = require('./models');
+const controllers = require('./controllers')(models, render);
+const { combinedRoutes } = require('./routes')({controllers, middlewares, router});
+
+// =======================
+// END configuration =====
+// =======================
+
+
+// =======================
+// setting up app ========
+// =======================
+
+// set up req.body
+app.use(bodyParser());
+
+// set up app routes
+app.use(combinedRoutes);
+
 // creates http server from app, and attach the io (realtime) middleware to app,
 const { io, server } = require('./io')(app);
 
 // =======================
-// middlewares =========
+// END setting up app ====
 // =======================
-app.use(bodyParser());
 
-const { User } = require('./models')
-app.use((ctx, next) => {
-  // TODO: move to router logic - separating nonAuth routes
-  if (ctx.method == "POST" || ctx.path == "/login") return next();
-  ctx.body = ctx.body || {}
-  const token = ctx.body.token || ctx.query.token || ctx.headers['x-access-token'];
-
-  try {
-   // jsonwebtoken should throw if can't verify https://github.com/auth0/node-jsonwebtoken
-   const decoded = jwt.verify(token, config.tokenSecret);
-   console.log('DECODED', decoded)
-   const user = User.findOne({ '_id': decoded.userId });
-
-   if (!user) throw new Error('user not found');
-   if (user.lastActive != decoded.lastActive) throw new Error('stale user');
-
-   ctx.user = user;
-   return next();
-  }
-  catch (err) {
-   console.log("token verification middleware failed", err);
-   if (ctx.path == "/") return next();
-   ctx.status = 403;
-   ctx.body = {
-     success: false,
-     message: "Unauthorized",
-     fullMessage: err.message
-   }
-  }
-
-});
-
-
-// =======================
-// routes =========
-// =======================
-router.get('/', async (ctx) => {
-  const { req, res, user } = ctx;
-  if (user) {
-    ctx.body = {
-      user,
-      loggedIn: true
-    }
-  } else {
-    ctx.body = {
-      loggedIn: false
-    }
-  }
-
-  ctx.status = 200;
-});
-
-const { auth } = require('./routes');
-app.use(router.routes());
-app.use(auth.routes());
-
-
+// TODO: remove this block post development
 io.on('connection', (socket) => {
   console.log('a user connected');
 
@@ -89,4 +51,7 @@ io.on('connection', (socket) => {
   });
 });
 
+// =======================
+// start the server ======
+// =======================
 server.listen(3000, () => console.log("listening on port 3000"));

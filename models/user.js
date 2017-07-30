@@ -16,6 +16,12 @@ const users = [
     name: { first: 'matin', last: 'suara'},
     email: 'hafbau@yahoo.com',
     password: 'password'
+  },
+  {
+    _id: '2',
+    name: { first: 'test_first', last: 'test_last'},
+    email: 'test@test.api',
+    password: 'test_password'
   }
 ]
 

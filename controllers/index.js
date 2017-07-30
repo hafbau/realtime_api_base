@@ -1,6 +1,8 @@
-const models = require('../models');
-const send = require('koa-send');
+const { getExports } = require('../utils');
 
-module.exports = {
-  auth: require('./auth')(models, send),
+module.exports = (models, render) => {
+  return getExports({
+    dir: __dirname,
+    currentFile: __filename
+  }, models, render)
 }

@@ -1,11 +1,10 @@
 const { getExports } = require('../utils')
 
-module.exports = (options) => {
+module.exports = () => {
   const toExport = getExports({
     dir: __dirname,
     currentFile: __filename
-  }, options);
+  });
 
-  toExport.combinedRoutes = options.router.routes();
   return toExport;
 };
